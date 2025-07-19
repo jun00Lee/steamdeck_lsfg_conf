@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>LSFG 옵션 설정</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
@@ -89,7 +89,7 @@
     <h3>LSFG 설정</h3>
     <label><input type="checkbox" id="legacyMode"> LEGACY <span class="desc">구형 LSFG 설정 사용</span></label>
     <label><input type="checkbox" id="hdr"> LSFG_HDR <span class="desc">HDR 사용 시 체크</span></label>
-    <label><input type="checkbox" id="perfMode"> LSFG_PERF_MODE</label>
+    <label><input type="checkbox" id="perfMode"> PERFORMANCE_MODE</label>
 
     <button onclick="unlockMesa()" id="mesaToggleBtn">추가 설정 열기 (남은 클릭: 5)</button>
     <div id="mesaSection">
@@ -183,7 +183,7 @@
       cmd += `LSFG_MULTIPLIER=${multiplier} `;
       if (hdr) cmd += "LSFG_HDR=1 ";
       cmd += `LSFG_FLOW_SCALE=${flowScale} `;
-      if (perfMode) cmd += "LSFG_PERF_MODE=1 ";
+      if (perfMode) cmd += "PERFORMANCE_MODE=1 ";
       if (mesaUnlocked) {
         mesaCheckboxes.forEach(cb => {
           if (cb.checked) cmd += `MESA_VK_WSI_PRESENT_MODE=${cb.value} `;
