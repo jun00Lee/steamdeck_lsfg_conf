@@ -183,7 +183,7 @@
       cmd += `LSFG_MULTIPLIER=${multiplier} `;
       if (hdr) cmd += "LSFG_HDR=1 ";
       cmd += `LSFG_FLOW_SCALE=${flowScale} `;
-      if (perfMode) cmd += "PERFORMANCE_MODE=1 ";
+      if (perfMode) cmd += "LSFG_PERFORMANCE_MODE=1 ";
       if (mesaUnlocked) {
         mesaCheckboxes.forEach(cb => {
           if (cb.checked) cmd += `MESA_VK_WSI_PRESENT_MODE=${cb.value} `;
