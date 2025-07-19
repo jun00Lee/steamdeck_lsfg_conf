@@ -3,13 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>LSFG 옵션 설정</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=1280, height=800, user-scalable=no">
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      width: 100%;
-      height: 100%;
+      width: 1280px;
+      height: 800px;
+      overflow: hidden;
       font-family: sans-serif;
       background: #f0f0f0;
       box-sizing: border-box;
@@ -18,21 +19,23 @@
     .container {
       width: 100%;
       height: 100%;
-      padding: 16px;
+      padding: 20px;
       box-sizing: border-box;
       background: #fff;
+      overflow: hidden;
       display: flex;
       flex-direction: column;
+      justify-content: start;
     }
 
     h2 {
-      margin: 0 0 10px 0;
+      margin-top: 0;
     }
 
     h3 {
       margin-top: 20px;
       border-bottom: 1px solid #ccc;
-      padding-bottom: 6px;
+      padding-bottom: 5px;
     }
 
     label {
@@ -56,14 +59,14 @@
     }
 
     button {
-  margin-top: 8px;
-  padding: 10px;
-  cursor: pointer;
-  font-size: 0.9em;
+      margin-top: 8px;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 0.9em;
     }
 
     .desc {
-      font-size: 0.85em;
+      font-size: 0.8em;
       color: #555;
     }
 
@@ -77,11 +80,6 @@
       display: none;
       margin-top: 10px;
     }
-
-    #copyMessage {
-      color: green;
-      margin-top: 5px;
-    }
   </style>
 </head>
 <body>
@@ -89,7 +87,7 @@
     <h2>LSFG 옵션 설정</h2>
 
     <h3>LSFG 설정</h3>
-    <label><input type="checkbox" id="enableLsfg" checked disabled> ENABLE_LSFG=1</label>
+    <label><input type="checkbox" id="legacyMode"> LEGACY <span class="desc">구형 LSFG 설정 사용</span></label>
     <label><input type="checkbox" id="hdr"> LSFG_HDR <span class="desc">HDR 사용 시 체크</span></label>
     <label><input type="checkbox" id="perfMode"> LSFG_PERF_MODE</label>
 
@@ -102,7 +100,7 @@
         <label><input type="checkbox" name="mesaMode" value="mailbox"> mailbox</label>
         <label><input type="checkbox" name="mesaMode" value="relaxed"> relaxed</label>       
       </div>
-      <label><input type="checkbox" id="MangoHud"> MangoHud <span class="desc">데스크탑모드에서만 사용</span></label>
+       <label><input type="checkbox" id="MangoHud"> MangoHud <span class="desc">데스크탑모드에서만 사용</span></label>
     </div>
 
     <h3>세부값 조절</h3>
@@ -117,7 +115,7 @@
     </label>
 
     <div id="output"></div>
-    <div id="copyMessage"></div>
+    <div id="copyMessage" style="color: green; margin-top: 5px;"></div>
     <button onclick="copyCommand()">복사</button>
     <button onclick="resetSettings()">초기화</button>
   </div>
@@ -128,7 +126,7 @@
 
     document.addEventListener("DOMContentLoaded", () => {
       const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
-      const controls = ['hdr', 'perfMode', 'MangoHud', 'multiplier', 'flowScale'];
+      const controls = ['legacyMode', 'hdr', 'perfMode', 'MangoHud', 'multiplier', 'flowScale'];
 
       mesaCheckboxes.forEach(cb => {
         cb.addEventListener('change', () => {
@@ -143,6 +141,7 @@
 
       controls.forEach(id => {
         document.getElementById(id).addEventListener('input', updateCommand);
+        document.getElementById(id).addEventListener('change', updateCommand);
       });
 
       updateCommand();
@@ -169,6 +168,7 @@
     }
 
     function updateCommand() {
+      const legacyMode = document.getElementById('legacyMode').checked;
       const multiplier = document.getElementById('multiplier').value;
       const hdr = document.getElementById('hdr').checked;
       const flowScale = document.getElementById('flowScale').value;
@@ -179,7 +179,7 @@
       document.getElementById('multiplierValue').textContent = multiplier;
       document.getElementById('flowScaleValue').textContent = flowScale;
 
-      let cmd = "ENABLE_LSFG=1 ";
+      let cmd = legacyMode ? "LSFG_LEGACY=1 " : "ENABLE_LSFG=1 ";
       cmd += `LSFG_MULTIPLIER=${multiplier} `;
       if (hdr) cmd += "LSFG_HDR=1 ";
       cmd += `LSFG_FLOW_SCALE=${flowScale} `;
@@ -200,11 +200,12 @@
       navigator.clipboard.writeText(text).then(() => {
         const msg = document.getElementById('copyMessage');
         msg.textContent = "복사되었습니다!";
-        setTimeout(() => msg.textContent = "", 2500);
+        setTimeout(() => msg.textContent = "", 3000);
       });
     }
 
     function resetSettings() {
+      document.getElementById('legacyMode').checked = false;
       document.getElementById('hdr').checked = false;
       document.getElementById('perfMode').checked = false;
       document.getElementById('MangoHud').checked = false;
