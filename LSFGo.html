@@ -1,224 +1,229 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>LSFG 옵션 설정</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: sans-serif;
-      background: #f0f0f0;
-      box-sizing: border-box;
-    }
+  <meta charset="UTF-8">
+  <title>LSFG 옵션 설정</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+      background: #f0f0f0;
+      box-sizing: border-box;
+    }
 
-    .container {
-      width: 100%;
-      height: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-      background: #fff;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: start;
-    }
+    .container {
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: start;
+    }
 
-    h2 {
-      margin-top: 0;
-    }
+    h2 {
+      margin-top: 0;
+    }
 
-    h3 {
-      margin-top: 20px;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 5px;
-    }
+    h3 {
+      margin-top: 20px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 5px;
+    }
 
-    label {
-      margin-top: 10px;
-      display: block;
-    }
+    label {
+      margin-top: 10px;
+      display: block;
+    }
 
-    input[type="range"] {
-      width: 100%;
-    }
+    input[type="range"] {
+      width: 100%;
+    }
 
-    #output {
-      margin-top: 20px;
-      font-weight: bold;
-      background: #eee;
-      padding: 10px;
-      border-radius: 5px;
-      white-space: pre-wrap;
-      flex-grow: 1;
-      overflow-y: auto;
-    }
+    #output {
+      margin-top: 20px;
+      font-weight: bold;
+      background: #eee;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-wrap;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
 
-    button {
-      margin-top: 8px;
-      padding: 10px;
-      cursor: pointer;
-      font-size: 0.9em;
-    }
+    button {
+      margin-top: 8px;
+      padding: 10px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
 
-    .desc {
-      font-size: 0.8em;
-      color: #555;
-    }
+    .desc {
+      font-size: 0.8em;
+      color: #555;
+    }
 
-    .mesa-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    .mesa-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-    #mesaSection {
-      display: none;
-      margin-top: 10px;
-    }
-  </style>
+    #mesaSection {
+      display: none;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h2>LSFG 옵션 설정</h2>
+  <div class="container">
+    <h2>LSFG 옵션 설정</h2>
 
-    <h3>LSFG 설정</h3>
-    <label><input type="checkbox" id="legacyMode"> LEGACY <span class="desc">구형 LSFG 설정 사용</span></label>
-    <label><input type="checkbox" id="hdr"> LSFG_HDR <span class="desc">HDR 사용 시 체크</span></label>
-    <label><input type="checkbox" id="perfMode"> PERFORMANCE_MODE</label>
+    <h3>LSFG 설정</h3>
+    <label><input type="checkbox" id="legacyMode"> LEGACY <span class="desc">구형 LSFG 설정 사용</span></label>
+    <label><input type="checkbox" id="hdr"> LSFG_HDR <span class="desc">HDR 사용 시 체크</span></label>
+    <label><input type="checkbox" id="perfMode"> PERFORMANCE_MODE</label>
+    <label><input type="checkbox" id="enableGamescopeWsi"> ENABLE_GAMESCOPE_WSI=0 <span class="desc">게임스코프 WSI 비활성화</span></label>
 
-    <button onclick="unlockMesa()" id="mesaToggleBtn">추가 설정 열기 (남은 클릭: 5)</button>
-    <div id="mesaSection">
-      <label>MESA_VK_WSI_PRESENT_MODE</label>
-      <div class="mesa-options">
-        <label><input type="checkbox" name="mesaMode" value="fifo"> fifo</label>
-        <label><input type="checkbox" name="mesaMode" value="immediate"> immediate</label>
-        <label><input type="checkbox" name="mesaMode" value="mailbox"> mailbox</label>
-        <label><input type="checkbox" name="mesaMode" value="relaxed"> relaxed</label>       
-      </div>
-       <label><input type="checkbox" id="MangoHud"> MangoHud <span class="desc">데스크탑모드에서만 사용</span></label>
-    </div>
 
-    <h3>세부값 조절</h3>
-    <label>LSFG_MULTIPLIER (2–4):
-      <input type="range" id="multiplier" min="1" max="4" value="2">
-      <span id="multiplierValue">2</span>
-    </label>
+    <button onclick="unlockMesa()" id="mesaToggleBtn">추가 설정 열기 (남은 클릭: 5)</button>
+    <div id="mesaSection">
+      <label>MESA_VK_WSI_PRESENT_MODE</label>
+      <div class="mesa-options">
+        <label><input type="checkbox" name="mesaMode" value="fifo"> fifo</label>
+        <label><input type="checkbox" name="mesaMode" value="immediate"> immediate</label>
+        <label><input type="checkbox" name="mesaMode" value="mailbox"> mailbox</label>
+        <label><input type="checkbox" name="mesaMode" value="relaxed"> relaxed</label>       
+      </div>
+       <label><input type="checkbox" id="MangoHud"> MangoHud <span class="desc">데스크탑모드에서만 사용</span></label>
+    </div>
 
-    <label>LSFG_FLOW_SCALE (0.25–1.0):
-      <input type="range" id="flowScale" min="0.25" max="1.0" step="0.05" value="1.0">
-      <span id="flowScaleValue">1.0</span>
-    </label>
+    <h3>세부값 조절</h3>
+    <label>LSFG_MULTIPLIER (2–4):
+      <input type="range" id="multiplier" min="1" max="4" value="2">
+      <span id="multiplierValue">2</span>
+    </label>
 
-    <div id="output"></div>
-    <div id="copyMessage" style="color: green; margin-top: 5px;"></div>
-    <button onclick="copyCommand()">복사</button>
-    <button onclick="resetSettings()">초기화</button>
-  </div>
+    <label>LSFG_FLOW_SCALE (0.25–1.0):
+      <input type="range" id="flowScale" min="0.25" max="1.0" step="0.05" value="1.0">
+      <span id="flowScaleValue">1.0</span>
+    </label>
 
-  <script>
-    let mesaClickCount = 0;
-    let mesaUnlocked = false;
+    <div id="output"></div>
+    <div id="copyMessage" style="color: green; margin-top: 5px;"></div>
+    <button onclick="copyCommand()">복사</button>
+    <button onclick="resetSettings()">초기화</button>
+  </div>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
-      const controls = ['legacyMode', 'hdr', 'perfMode', 'MangoHud', 'multiplier', 'flowScale'];
+  <script>
+    let mesaClickCount = 0;
+    let mesaUnlocked = false;
 
-      mesaCheckboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-          if (cb.checked) {
-            mesaCheckboxes.forEach(other => {
-              if (other !== cb) other.checked = false;
-            });
-          }
-          updateCommand();
-        });
-      });
+    document.addEventListener("DOMContentLoaded", () => {
+      const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
+      const controls = ['legacyMode', 'hdr', 'perfMode', 'MangoHud', 'multiplier', 'flowScale', 'enableGamescopeWsi'];
 
-      controls.forEach(id => {
-        document.getElementById(id).addEventListener('input', updateCommand);
-        document.getElementById(id).addEventListener('change', updateCommand);
-      });
+      mesaCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+          if (cb.checked) {
+            mesaCheckboxes.forEach(other => {
+              if (other !== cb) other.checked = false;
+            });
+          }
+          updateCommand();
+        });
+      });
 
-      updateCommand();
-    });
+      controls.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateCommand);
+        document.getElementById(id).addEventListener('change', updateCommand);
+      });
 
-    function unlockMesa() {
-      const btn = document.getElementById("mesaToggleBtn");
-      const section = document.getElementById("mesaSection");
+      updateCommand();
+    });
 
-      if (!mesaUnlocked) {
-        mesaClickCount++;
-        const remaining = 5 - mesaClickCount;
-        btn.textContent = `추가 설정 열기 (남은 클릭: ${remaining > 0 ? remaining : 0})`;
+    function unlockMesa() {
+      const btn = document.getElementById("mesaToggleBtn");
+      const section = document.getElementById("mesaSection");
 
-        if (mesaClickCount >= 5) {
-          mesaUnlocked = true;
-          section.style.display = 'block';
-          btn.textContent = "추가 설정 열기";
-        }
-      } else {
-        section.style.display = (section.style.display === 'none') ? 'block' : 'none';
-      }
-      updateCommand();
-    }
+      if (!mesaUnlocked) {
+        mesaClickCount++;
+        const remaining = 5 - mesaClickCount;
+        btn.textContent = `추가 설정 열기 (남은 클릭: ${remaining > 0 ? remaining : 0})`;
 
-    function updateCommand() {
-      const legacyMode = document.getElementById('legacyMode').checked;
-      const multiplier = document.getElementById('multiplier').value;
-      const hdr = document.getElementById('hdr').checked;
-      const flowScale = document.getElementById('flowScale').value;
-      const perfMode = document.getElementById('perfMode').checked;
-      const MangoHud = document.getElementById('MangoHud').checked;
-      const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
+        if (mesaClickCount >= 5) {
+          mesaUnlocked = true;
+          section.style.display = 'block';
+          btn.textContent = "추가 설정 열기";
+        }
+      } else {
+        section.style.display = (section.style.display === 'none') ? 'block' : 'none';
+      }
+      updateCommand();
+    }
 
-      document.getElementById('multiplierValue').textContent = multiplier;
-      document.getElementById('flowScaleValue').textContent = flowScale;
+    function updateCommand() {
+      const legacyMode = document.getElementById('legacyMode').checked;
+      const multiplier = document.getElementById('multiplier').value;
+      const hdr = document.getElementById('hdr').checked;
+      const flowScale = document.getElementById('flowScale').value;
+      const perfMode = document.getElementById('perfMode').checked;
+      const MangoHud = document.getElementById('MangoHud').checked;
+      const enableGamescopeWsi = document.getElementById('enableGamescopeWsi').checked;
+      const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
 
-      let cmd = legacyMode ? "LSFG_LEGACY=1 " : "ENABLE_LSFG=1 ";
-      cmd += `LSFG_MULTIPLIER=${multiplier} `;
-      if (hdr) cmd += "LSFG_HDR=1 ";
-      cmd += `LSFG_FLOW_SCALE=${flowScale} `;
-      if (perfMode) cmd += "LSFG_PERFORMANCE_MODE=1 ";
-      if (mesaUnlocked) {
-        mesaCheckboxes.forEach(cb => {
-          if (cb.checked) cmd += `MESA_VK_WSI_PRESENT_MODE=${cb.value} `;
-        });
-      }
-      if (MangoHud) cmd += "MangoHud ";
-      cmd += "%COMMAND%";
+      document.getElementById('multiplierValue').textContent = multiplier;
+      document.getElementById('flowScaleValue').textContent = flowScale;
 
-      document.getElementById('output').textContent = cmd;
-    }
+      let cmd = legacyMode ? "LSFG_LEGACY=1 " : "ENABLE_LSFG=1 ";
+      cmd += `LSFG_MULTIPLIER=${multiplier} `;
+      if (hdr) cmd += "LSFG_HDR=1 ";
+      cmd += `LSFG_FLOW_SCALE=${flowScale} `;
+      if (perfMode) cmd += "LSFG_PERFORMANCE_MODE=1 ";
+      if (enableGamescopeWsi) cmd += "ENABLE_GAMESCOPE_WSI=0 ";
+      if (mesaUnlocked) {
+        mesaCheckboxes.forEach(cb => {
+          if (cb.checked) cmd += `MESA_VK_WSI_PRESENT_MODE=${cb.value} `;
+        });
+      }
+      if (MangoHud) cmd += "MangoHud ";
+      cmd += "%COMMAND%";
 
-    function copyCommand() {
-      const text = document.getElementById('output').textContent;
-      navigator.clipboard.writeText(text).then(() => {
-        const msg = document.getElementById('copyMessage');
-        msg.textContent = "복사되었습니다!";
-        setTimeout(() => msg.textContent = "", 3000);
-      });
-    }
+      document.getElementById('output').textContent = cmd;
+    }
 
-    function resetSettings() {
-      document.getElementById('legacyMode').checked = false;
-      document.getElementById('hdr').checked = false;
-      document.getElementById('perfMode').checked = false;
-      document.getElementById('MangoHud').checked = false;
-      document.getElementById('multiplier').value = 2;
-      document.getElementById('flowScale').value = 1.0;
+    function copyCommand() {
+      const text = document.getElementById('output').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const msg = document.getElementById('copyMessage');
+        msg.textContent = "복사되었습니다!";
+        setTimeout(() => msg.textContent = "", 3000);
+      });
+    }
 
-      const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
-      mesaCheckboxes.forEach(cb => cb.checked = false);
+    function resetSettings() {
+      document.getElementById('legacyMode').checked = false;
+      document.getElementById('hdr').checked = false;
+      document.getElementById('perfMode').checked = false;
+      document.getElementById('MangoHud').checked = false;
+      document.getElementById('enableGamescopeWsi').checked = false;
+      document.getElementById('multiplier').value = 2;
+      document.getElementById('flowScale').value = 1.0;
 
-      document.getElementById('multiplierValue').textContent = "2";
-      document.getElementById('flowScaleValue').textContent = "1.0";
-      updateCommand();
-    }
-  </script>
+      const mesaCheckboxes = document.querySelectorAll('input[name="mesaMode"]');
+      mesaCheckboxes.forEach(cb => cb.checked = false);
+
+      document.getElementById('multiplierValue').textContent = "2";
+      document.getElementById('flowScaleValue').textContent = "1.0";
+      updateCommand();
+    }
+  </script>
 </body>
 </html>
