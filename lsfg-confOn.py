@@ -58,9 +58,8 @@ class ConfigEditor(Gtk.Window):
         entries, current = [], {
             "exe": "", "multiplier": 2, "flow_scale": 1.0, "fps_limit": 48,
             "performance_mode": False, "hdr_mode": False, "mangohud": False,
-            "steamdeck_compat": False,
-            "present_mode": "fifo",
-            "disable_gamescope_wsi": False # Added this
+            "steamdeck_compat": False, "enable_gamescope_wsi": None,
+            "present_mode": "fifo"
         }
         for line in self.config_lines:
             line = line.strip()
@@ -69,9 +68,8 @@ class ConfigEditor(Gtk.Window):
                 current.update({
                     "exe": "", "multiplier": 2, "flow_scale": 1.0, "fps_limit": 48,
                     "performance_mode": False, "hdr_mode": False, "mangohud": False,
-                    "steamdeck_compat": False,
-                    "present_mode": "fifo",
-                    "disable_gamescope_wsi": False # Added this
+                    "steamdeck_compat": False, "enable_gamescope_wsi": None,
+                    "present_mode": "fifo"
                 })
             elif line.startswith("exe ="):
                 current["exe"] = line.split("=", 1)[1].strip().strip('"')
@@ -96,18 +94,18 @@ class ConfigEditor(Gtk.Window):
                 current["hdr_mode"] = line.split("=", 1)[1].strip().lower() == "true"
             elif line.startswith("mangohud ="):
                 current["mangohud"] = line.split("=", 1)[1].strip().lower() == "true"
-            elif line.startswith("env ="):
+            elif line.startswith("env ="): # SteamDeck=0/1 파싱
                 env_value = line.split("=", 1)[1].strip().strip('"')
-                if "SteamDeck=1" in env_value: # Changed to check for substring
+                if "SteamDeck=1" in env_value:
                     current["steamdeck_compat"] = True
-                else:
+                elif "SteamDeck=0" in env_value:
                     current["steamdeck_compat"] = False
-                
-                # Check for ENABLE_GAMESCOPE_WSI=0 within the env string
-                if "ENABLE_GAMESCOPE_WSI=0" in env_value: # Added this
-                    current["disable_gamescope_wsi"] = True # Added this
-                else: # Added this
-                    current["disable_gamescope_wsi"] = False # Added this
+            elif line.startswith("enable_gamescope_wsi ="): # ENABLE_GAMESCOPE_WSI 파싱 (0/1)
+                value = line.split("=", 1)[1].strip()
+                if value == "1":
+                    current["enable_gamescope_wsi"] = True
+                elif value == "0":
+                    current["enable_gamescope_wsi"] = False
             elif line.startswith("experimental_present_mode ="):
                 current["present_mode"] = line.split("=", 1)[1].strip().strip('"')
             
@@ -128,9 +126,8 @@ class ConfigEditor(Gtk.Window):
         data = {
             "exe": "", "multiplier": 2, "flow_scale": 1.0, "fps_limit": 48,
             "performance_mode": False, "hdr_mode": False, "mangohud": False,
-            "steamdeck_compat": False,
-            "present_mode": "fifo",
-            "disable_gamescope_wsi": False # Added this
+            "steamdeck_compat": False, "enable_gamescope_wsi": None,
+            "present_mode": "fifo"
         }
         if isinstance(entry, dict):
             data.update(entry) 
@@ -168,14 +165,18 @@ class ConfigEditor(Gtk.Window):
 
         add_row("게임 이름 (exe):", exe_input_box)
 
-        widgets["steamdeck_compat"] = Gtk.CheckButton(label="Steam Deck 호환 모드 (SteamDeck=1/0)");
+        widgets["steamdeck_compat"] = Gtk.CheckButton(label="Steam Deck 호환 모드");
         widgets["steamdeck_compat"].set_active(data["steamdeck_compat"])
         page.pack_start(widgets["steamdeck_compat"], False, False, 0)
         
-        # New checkbox for ENABLE_GAMESCOPE_WSI=0
-        widgets["disable_gamescope_wsi"] = Gtk.CheckButton(label="Gamescope WSI 비활성화 (ENABLE_GAMESCOPE_WSI=0)"); # Added this
-        widgets["disable_gamescope_wsi"].set_active(data["disable_gamescope_wsi"]) # Added this
-        page.pack_start(widgets["disable_gamescope_wsi"], False, False, 0) # Added this
+        # ENABLE_GAMESCOPE_WSI 체크 항목 추가
+        widgets["enable_gamescope_wsi"] = Gtk.CheckButton(label="Gamescope WSI 활성화 (ENABLE_GAMESCOPE_WSI=0)"); # 레이블 변경
+        if data["enable_gamescope_wsi"] is not None:
+            widgets["enable_gamescope_wsi"].set_active(data["enable_gamescope_wsi"])
+        else:
+            widgets["enable_gamescope_wsi"].set_active(False) # 기본값은 체크 해제
+        page.pack_start(widgets["enable_gamescope_wsi"], False, False, 0)
+
 
         combo = Gtk.ComboBoxText()
         present_modes = ["fifo", "immediate", "mailbox", "relaxed"]
@@ -197,8 +198,8 @@ class ConfigEditor(Gtk.Window):
         add_row("FPS 제한:", widgets["fps_limit"])
 
         for key, label in [("performance_mode", "Performance Mode"),
-                                 ("hdr_mode", "HDR Mode"),
-                                 ("mangohud", "MangoHud 표시")]:
+                            ("hdr_mode", "HDR Mode"),
+                            ("mangohud", "MangoHud 표시")]:
             check = Gtk.CheckButton(label=label); check.set_active(data[key])
             widgets[key] = check
             page.pack_start(check, False, False, 0)
@@ -240,16 +241,8 @@ class ConfigEditor(Gtk.Window):
             hdr = "true" if widgets["hdr_mode"].get_active() else "false"
             mango = "true" if widgets["mangohud"].get_active() else "false"
             
-            env_vars = []
-            if widgets["steamdeck_compat"].get_active():
-                env_vars.append("SteamDeck=1")
-            else:
-                env_vars.append("SteamDeck=0")
-
-            if widgets["disable_gamescope_wsi"].get_active(): # Added this
-                env_vars.append("ENABLE_GAMESCOPE_WSI=0") # Added this
-
-            env_string = "&".join(env_vars) # Modified to handle multiple env vars
+            steamdeck_compat_active = widgets["steamdeck_compat"].get_active()
+            enable_gamescope_wsi_active = widgets["enable_gamescope_wsi"].get_active()
 
             present = widgets["present_mode"].get_active_text()
 
@@ -263,7 +256,13 @@ class ConfigEditor(Gtk.Window):
                 f"hdr_mode = {hdr}\n",
                 f"mangohud = {mango}\n",
             ])
-            new_lines.append(f'env = "{env_string}"\n') # Modified this line
+            
+            # Steam Deck 호환 모드는 env로 저장
+            new_lines.append(f'env = "SteamDeck={"1" if steamdeck_compat_active else "0"}"\n')
+
+            # ENABLE_GAMESCOPE_WSI는 체크 시에만 0으로 저장
+            if enable_gamescope_wsi_active:
+                new_lines.append(f"enable_gamescope_wsi = 0\n") 
             
             new_lines.append(f'experimental_present_mode = "{present}"\n')
             new_lines.append("\n")
@@ -331,7 +330,7 @@ class ConfigEditor(Gtk.Window):
 
             except Exception as e:
                 print(f"Error reading libraryfolders.vdf: {e}")
-        
+            
         return library_paths
 
     def get_installed_steam_games(self):
@@ -345,7 +344,7 @@ class ConfigEditor(Gtk.Window):
                 for item in os.listdir(games_common_path):
                     game_dir = os.path.join(games_common_path, item)
                     if os.path.isdir(game_dir):
-                        game_names.add(item) 
+                        game_names.add(item)    
         
         return sorted(list(game_names))
 
