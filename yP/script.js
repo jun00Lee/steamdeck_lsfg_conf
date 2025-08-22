@@ -4,11 +4,16 @@ const videoUrlInput = document.getElementById('video-url');
 const addBtn = document.getElementById('add-btn');
 const playerDiv = document.getElementById('player');
 const tabListEl = document.getElementById('tab-list');
-const tabNameInput = document.getElementById('tab-name-input');
-const addTabBtn = document.getElementById('add-tab-btn');
+const addTabPlusBtn = document.getElementById('add-tab-btn');
 const exportBtn = document.getElementById('export-btn');
 const importBtn = document.getElementById('import-btn');
 const importInput = document.getElementById('import-input');
+
+// 모달 관련 변수
+const modalOverlay = document.getElementById('modal-overlay');
+const modalTabNameInput = document.getElementById('modal-tab-name-input');
+const modalOkBtn = document.getElementById('modal-ok-btn');
+const modalCancelBtn = document.getElementById('modal-cancel-btn');
 
 const ALL_PLAYLISTS_KEY = 'allPlaylists';
 const ACTIVE_TAB_KEY = 'activeTabName';
@@ -16,7 +21,7 @@ const ACTIVE_TAB_KEY = 'activeTabName';
 let player;
 let allPlaylists = {};
 let activeTabName = '기본';
-let playlist = []; // 현재 활성화된 탭의 플레이리스트
+let playlist = [];
 let currentIndex = -1;
 let fadeOutTimer = null;
 
@@ -156,14 +161,12 @@ function switchTab(tabName) {
     }
 }
 
-// --- 탭 삭제 ---
 function deleteTab(tabName) {
     if (Object.keys(allPlaylists).length <= 1) {
         alert("최소한 하나의 플레이리스트는 남겨두어야 합니다.");
         return;
     }
     
-    // 삭제 확인 메시지 추가
     if (confirm(`'${tabName}' 플레이리스트를 정말로 삭제하시겠습니까?`)) {
         const wasActive = tabName === activeTabName;
         delete allPlaylists[tabName];
@@ -216,10 +219,34 @@ function addEventListeners() {
     videoUrlInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') addVideo();
     });
-
-    addTabBtn.addEventListener('click', addTab);
-    tabNameInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') addTab();
+    
+    // "+" 버튼 클릭 이벤트
+    addTabPlusBtn.addEventListener('click', showAddTabModal);
+    
+    // 모달 버튼 클릭 이벤트
+    modalOkBtn.addEventListener('click', () => {
+        const tabName = modalTabNameInput.value.trim();
+        if (tabName) {
+            addTab(tabName);
+        }
+        hideAddTabModal();
+    });
+    
+    modalTabNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const tabName = modalTabNameInput.value.trim();
+            if (tabName) {
+                addTab(tabName);
+            }
+            hideAddTabModal();
+        }
+    });
+    
+    modalCancelBtn.addEventListener('click', hideAddTabModal);
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target.id === 'modal-overlay') {
+            hideAddTabModal();
+        }
     });
 
     tabListEl.addEventListener('click', (e) => {
@@ -246,15 +273,13 @@ function addEventListeners() {
         }
     });
 
-    // 내보내기/불러오기 버튼 이벤트 리스너
     exportBtn.addEventListener('click', exportPlaylist);
     importBtn.addEventListener('click', () => importInput.click());
     importInput.addEventListener('change', importPlaylist);
 }
 
-// --- 탭 추가 ---
-function addTab() {
-    const tabName = tabNameInput.value.trim();
+// --- 탭 추가 (모달에서 호출) ---
+function addTab(tabName) {
     if (!tabName) {
         alert('플레이리스트 이름을 입력해주세요.');
         return;
@@ -276,7 +301,17 @@ function addTab() {
         player = null;
     }
     playerDiv.innerHTML = '';
-    tabNameInput.value = '';
+}
+
+// --- 모달 제어 함수 ---
+function showAddTabModal() {
+    modalOverlay.style.display = 'flex';
+    modalTabNameInput.focus();
+}
+
+function hideAddTabModal() {
+    modalOverlay.style.display = 'none';
+    modalTabNameInput.value = '';
 }
 
 // --- 영상 추가 ---

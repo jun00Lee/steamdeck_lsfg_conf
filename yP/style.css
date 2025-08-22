@@ -31,6 +31,9 @@ h1 {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
     padding: 10px;
     box-sizing: border-box;
+    display: flex; /* Flexbox로 변경 */
+    align-items: center; /* 세로 중앙 정렬 */
+    gap: 10px; /* 버튼과 리스트 사이 간격 */
 }
 
 #tab-list {
@@ -40,6 +43,7 @@ h1 {
     padding: 0;
     margin: 0;
     border-bottom: 2px solid #333;
+    flex-grow: 1; /* 리스트가 남은 공간을 차지하도록 */
 }
 
 .tab-item {
@@ -87,33 +91,24 @@ h1 {
     opacity: 1;
 }
 
-.tab-input-section {
-    display: flex;
-    gap: 10px;
-    padding-top: 10px;
-}
-
-#tab-name-input {
-    flex-grow: 1;
-    padding: 8px;
-    border: 1px solid #333;
-    border-radius: 4px;
-    background-color: #2b2b2b;
-    color: #e0e0e0;
-}
-
-#add-tab-btn {
-    padding: 8px 12px;
+/* "+" 버튼 스타일 */
+.add-tab-plus-btn {
+    width: 40px;
+    height: 40px;
     background-color: #6200ea;
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
+    flex-shrink: 0; /* 크기가 줄어들지 않도록 */
 }
 
-#add-tab-btn:hover {
+.add-tab-plus-btn:hover {
     background-color: #3700b3;
+    transform: rotate(90deg);
 }
 
 /* 메인 콘텐츠 영역 */
@@ -219,7 +214,7 @@ h1 {
 .video-list-container {
     height: 150px;
     overflow-y: auto;
-    padding-right: 5px; /* 요청하신 대로 5px로 수정 */
+    padding-right: 5px;
 }
 
 /* 커스텀 스크롤바 */
@@ -296,6 +291,72 @@ h1 {
     text-align: center;
     color: #888;
     padding: 20px;
+}
+
+/* 모달 팝업 스타일 */
+.modal-overlay {
+    display: none; /* 기본적으로 숨김 */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #1e1e1e;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+    width: 300px;
+    text-align: center;
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    color: #ffffff;
+}
+
+#modal-tab-name-input {
+    width: calc(100% - 20px);
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    background-color: #2b2b2b;
+    color: #e0e0e0;
+}
+
+.modal-buttons button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 0 5px;
+}
+
+#modal-ok-btn {
+    background-color: #6200ea;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+#modal-ok-btn:hover {
+    background-color: #3700b3;
+}
+
+#modal-cancel-btn {
+    background-color: #444;
+    color: white;
+    transition: background-color 0.3s;
+}
+
+#modal-cancel-btn:hover {
+    background-color: #2b2b2b;
 }
 
 /* 반응형 디자인 */

@@ -13,10 +13,7 @@
         <div class="tabs-section">
             <ul id="tab-list">
                 </ul>
-            <div class="tab-input-section">
-                <input type="text" id="tab-name-input" placeholder="새 플레이리스트 이름">
-                <button id="add-tab-btn">추가</button>
-            </div>
+            <button id="add-tab-btn" class="add-tab-plus-btn">+</button>
         </div>
         
         <div class="main-content">
@@ -41,6 +38,17 @@
                         </ul>
                 </div>
                 
+            </div>
+        </div>
+    </div>
+    
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h3>새 플레이리스트 이름</h3>
+            <input type="text" id="modal-tab-name-input" placeholder="이름을 입력하세요">
+            <div class="modal-buttons">
+                <button id="modal-ok-btn">확인</button>
+                <button id="modal-cancel-btn">취소</button>
             </div>
         </div>
     </div>
