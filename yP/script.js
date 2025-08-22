@@ -199,7 +199,7 @@ function renderPlaylist() {
 
         listItem.innerHTML = `
             <span class="video-title">${video.title}</span>
-            <button class="delete-btn">삭제</button>
+            <button class="delete-btn">X</button>
         `;
         videoListEl.appendChild(listItem);
     });
