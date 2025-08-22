@@ -19,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- YouTube IFrame API 준비 시 호출 ---
 function onYouTubeIframeAPIReady() {
     if (playlist.length > 0) {
-        initializePlayer(0, false);
+        // 첫 번째 영상부터 자동 재생
+        initializePlayer(0);
     }
 }
 
@@ -38,8 +39,6 @@ function initializePlayer(index, autoplay = true) {
             fs: 1,
             enablejsapi: 1,
             playsinline: 1,
-            // ⚠️ mute 옵션 제거 또는 false로 설정
-            // mute: 0 // 이 부분이 있었다면 제거하거나 0으로 설정하세요.
         },
         events: {
             onReady: onPlayerReady,
@@ -173,7 +172,6 @@ async function addVideo() {
 function deleteVideo(index) {
     if (confirm("정말로 이 영상을 삭제하시겠습니까?")) {
         const isCurrent = index === currentIndex;
-
         playlist.splice(index, 1);
         savePlaylist();
         renderPlaylist();
@@ -196,22 +194,20 @@ function deleteVideo(index) {
 
 // --- 영상 재생 ---
 function playVideo(index) {
-    if (index >= 0 && index < playlist.length && player) {
+    if (index >= 0 && index < playlist.length) {
         currentIndex = index;
-        player.loadVideoById(playlist[currentIndex].videoId);
+        if (player) {
+            player.loadVideoById(playlist[currentIndex].videoId);
+        } else {
+            initializePlayer(index);
+        }
         updateActiveItem();
         updateMediaSession(playlist[currentIndex].title);
-    } else if (!player && playlist.length > 0) {
-        initializePlayer(index);
-        updateMediaSession(playlist[index].title);
     }
 }
 
 function onPlayerReady(event) {
-    // 자동재생 허용을 위해 playVideo 호출
     event.target.playVideo();
-    // 볼륨을 100으로 설정 (필요한 경우)
-    event.target.setVolume(100);
 }
 
 function onPlayerStateChange(event) {
