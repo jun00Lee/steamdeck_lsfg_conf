@@ -19,12 +19,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- YouTube IFrame API 준비 시 호출 ---
 function onYouTubeIframeAPIReady() {
     if (playlist.length > 0) {
-        initializePlayer(0);
+        // 초기 로딩 시 플레이어만 준비하고, 재생은 사용자 동작으로 시작
+        initializePlayer(0, false);
     }
 }
 
 // --- 플레이어 초기화 ---
-function initializePlayer(index) {
+function initializePlayer(index, autoplay = true) {
     if (player) player.destroy();
     currentIndex = index;
 
@@ -33,10 +34,11 @@ function initializePlayer(index) {
         width: '640',
         videoId: playlist[currentIndex].videoId,
         playerVars: {
-            autoplay: 1,
+            autoplay: autoplay ? 1 : 0, // 초기 로딩 시 자동재생 방지
             rel: 0,
             fs: 1,
             enablejsapi: 1,
+            playsinline: 1, // iOS 등에서 인라인 재생
         },
         events: {
             onReady: onPlayerReady,
@@ -157,8 +159,9 @@ async function addVideo() {
     savePlaylist();
     renderPlaylist();
 
+    // 영상 추가 후, 기존 플레이어가 없거나 정지 상태일 때만 재생
     if (!player) {
-        initializePlayer(0);
+        initializePlayer(playlist.length - 1);
     } else if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
         playVideo(playlist.length - 1);
     }
@@ -170,6 +173,7 @@ async function addVideo() {
 function deleteVideo(index) {
     if (confirm("정말로 이 영상을 삭제하시겠습니까?")) {
         const isCurrent = index === currentIndex;
+
         playlist.splice(index, 1);
         savePlaylist();
         renderPlaylist();
@@ -190,16 +194,16 @@ function deleteVideo(index) {
     }
 }
 
-// --- 영상 재생 (수정된 부분) ---
+// --- 영상 재생 ---
 function playVideo(index) {
     if (index >= 0 && index < playlist.length && player) {
         currentIndex = index;
         player.loadVideoById(playlist[currentIndex].videoId);
         updateActiveItem();
-        updateMediaSession(playlist[currentIndex].title); // 👈 이 부분을 추가합니다
+        updateMediaSession(playlist[currentIndex].title);
     } else if (!player && playlist.length > 0) {
         initializePlayer(index);
-        updateMediaSession(playlist[index].title); // 👈 이 부분을 추가합니다
+        updateMediaSession(playlist[index].title);
     }
 }
 
@@ -239,7 +243,7 @@ function stopFadeOutCheck() {
     }
 }
 
-// --- Media Session API 함수 (추가된 부분) ---
+// --- Media Session API 함수 ---
 function updateMediaSession(title) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({
@@ -253,7 +257,6 @@ function updateMediaSession(title) {
 
         navigator.mediaSession.playbackState = 'playing';
 
-        // 이전, 다음, 재생/일시정지 버튼 컨트롤러 추가
         navigator.mediaSession.setActionHandler('play', () => { player.playVideo(); });
         navigator.mediaSession.setActionHandler('pause', () => { player.pauseVideo(); });
         navigator.mediaSession.setActionHandler('previoustrack', () => {
