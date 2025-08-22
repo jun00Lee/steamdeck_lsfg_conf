@@ -258,4 +258,75 @@ h1 {
 #export-btn:hover, #import-btn:hover {
     background-color: #004d40;
 }
+
+/* 파일 입출력 섹션 스타일 */
+.file-io-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#export-btn, #import-btn {
+    flex-grow: 1;
+    padding: 10px 15px;
+    background-color: #00796b;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#export-btn:hover, #import-btn:hover {
+    background-color: #004d40;
+}
+
+/* 탭 아이템에 삭제 버튼 스타일 추가 */
+.tab-item {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    background-color: #2b2b2b;
+    border-radius: 5px 5px 0 0;
+    margin-right: 5px;
+    transition: background-color 0.3s;
+    position: relative; /* 삭제 버튼 위치 조정을 위해 추가 */
+}
+
+.tab-item:hover {
+    background-color: #3700b3;
+}
+
+.tab-item.active {
+    background-color: #6200ea;
+    font-weight: bold;
+}
+
+.tab-item .tab-delete-btn {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #e0e0e0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 10px;
+    padding: 0;
+    line-height: 1;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.tab-item .tab-delete-btn:hover {
+    opacity: 1;
+    color: #ff6b6b;
+}
+
+/* 활성 탭에서는 삭제 버튼이 더 잘 보이도록 설정 */
+.tab-item.active .tab-delete-btn {
+    color: white;
+    opacity: 1;
+}
+
 }

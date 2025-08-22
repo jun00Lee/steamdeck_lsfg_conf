@@ -121,8 +121,12 @@ function renderTabs() {
     tabNames.forEach(name => {
         const tabItem = document.createElement('li');
         tabItem.classList.add('tab-item');
-        tabItem.textContent = name;
         tabItem.dataset.tabName = name;
+        
+        tabItem.innerHTML = `
+            <span>${name}</span>
+            <button class="tab-delete-btn">×</button>
+        `;
         
         if (name === activeTabName) {
             tabItem.classList.add('active');
@@ -149,6 +153,28 @@ function switchTab(tabName) {
             player = null;
         }
         playerDiv.innerHTML = '';
+    }
+}
+
+// --- 탭 삭제 ---
+function deleteTab(tabName) {
+    if (Object.keys(allPlaylists).length <= 1) {
+        alert("최소한 하나의 플레이리스트는 남겨두어야 합니다.");
+        return;
+    }
+    
+    // 삭제 확인 메시지 추가
+    if (confirm(`'${tabName}' 플레이리스트를 정말로 삭제하시겠습니까?`)) {
+        const wasActive = tabName === activeTabName;
+        delete allPlaylists[tabName];
+        saveAllPlaylists();
+
+        if (wasActive) {
+            const newTabName = Object.keys(allPlaylists)[0];
+            switchTab(newTabName);
+        } else {
+            renderTabs();
+        }
     }
 }
 
@@ -198,7 +224,11 @@ function addEventListeners() {
 
     tabListEl.addEventListener('click', (e) => {
         const tabItem = e.target.closest('.tab-item');
-        if (tabItem) {
+        if (!tabItem) return;
+
+        if (e.target.classList.contains('tab-delete-btn')) {
+            deleteTab(tabItem.dataset.tabName);
+        } else {
             switchTab(tabItem.dataset.tabName);
         }
     });
@@ -337,19 +367,16 @@ function importPlaylist(event) {
                 throw new Error('올바른 JSON 형식이 아닙니다.');
             }
             
-            // 불러온 데이터로 allPlaylists 업데이트
             allPlaylists = importedData;
             
-            // 불러온 데이터에 '기본' 탭이 없으면 추가
             if (!allPlaylists['기본']) {
                 allPlaylists['기본'] = [];
             }
             
-            // 활성 탭 설정
             activeTabName = Object.keys(allPlaylists)[0];
             playlist = allPlaylists[activeTabName];
 
-            saveAllPlaylists(); // 로컬 스토리지에 저장
+            saveAllPlaylists();
             renderTabs();
             renderPlaylist();
 
