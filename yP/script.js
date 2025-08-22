@@ -55,16 +55,18 @@ async function fetchTitleFromOEmbed(videoId) {
         return data.title;
     } catch (error) {
         console.error("제목 가져오기 실패:", error);
-        return `제목 없음 (${videoId})`;
+        return `제목 없음 (${videoId.substring(0, 5)}...)`;
     }
 }
 
 // --- 로컬 저장소 연동 ---
+// 로컬 저장소를 로드하고, 제목이 없는 경우 oEmbed로 가져와 업데이트합니다.
 async function loadPlaylist() {
     const storedList = localStorage.getItem(STORAGE_KEY);
     if (storedList) {
         try {
             playlist = JSON.parse(storedList);
+            // 기존 플레이리스트에서 제목이 비어 있거나 올바르지 않은 경우 업데이트
             for (let video of playlist) {
                 if (!video.title || video.title.startsWith('영상')) {
                     video.title = await fetchTitleFromOEmbed(video.videoId);
@@ -150,6 +152,7 @@ async function addVideo() {
         return;
     }
 
+    // oEmbed를 통해 제목을 가져옵니다.
     const videoTitle = await fetchTitleFromOEmbed(videoId);
     const newVideo = { title: videoTitle, videoId: videoId };
 
