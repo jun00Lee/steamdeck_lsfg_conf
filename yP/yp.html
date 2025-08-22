@@ -9,17 +9,29 @@
 <body>
     <div class="container">
         <h1>나만의 유튜브 플레이리스트</h1>
-        <div class="input-section">
-            <input type="text" id="video-url" placeholder="유튜브 URL을 입력하세요">
-            <button id="add-btn">추가</button>
-        </div>
-        <div class="player-section">
-            <div id="player"></div>
-        </div>
-        <div class="list-section">
-            <h2>재생 목록</h2>
-            <ul id="video-list">
+        
+        <div class="tabs-section">
+            <ul id="tab-list">
                 </ul>
+            <div class="tab-input-section">
+                <input type="text" id="tab-name-input" placeholder="새 플레이리스트 이름">
+                <button id="add-tab-btn">추가</button>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="player-section">
+                <div id="player"></div>
+            </div>
+            <div class="list-section">
+                <h2>재생 목록</h2>
+                <div class="input-section">
+                    <input type="text" id="video-url" placeholder="유튜브 URL을 입력하세요">
+                    <button id="add-btn">추가</button>
+                </div>
+                <ul id="video-list">
+                    </ul>
+            </div>
         </div>
     </div>
     

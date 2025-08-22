@@ -3,23 +3,29 @@ const videoListEl = document.getElementById('video-list');
 const videoUrlInput = document.getElementById('video-url');
 const addBtn = document.getElementById('add-btn');
 const playerDiv = document.getElementById('player');
-const STORAGE_KEY = 'youtubePlaylist';
+const tabListEl = document.getElementById('tab-list');
+const tabNameInput = document.getElementById('tab-name-input');
+const addTabBtn = document.getElementById('add-tab-btn');
+
+const ALL_PLAYLISTS_KEY = 'allPlaylists';
+const ACTIVE_TAB_KEY = 'activeTabName';
 
 let player;
-let playlist = [];
+let allPlaylists = {};
+let activeTabName = '기본';
+let playlist = []; // 현재 활성화된 탭의 플레이리스트
 let currentIndex = -1;
 let fadeOutTimer = null;
 
 // --- 초기화 ---
 document.addEventListener('DOMContentLoaded', () => {
-    loadPlaylist();
+    loadAllPlaylists();
     addEventListeners();
 });
 
 // --- YouTube IFrame API 준비 시 호출 ---
 function onYouTubeIframeAPIReady() {
     if (playlist.length > 0) {
-        // 첫 번째 영상부터 자동 재생
         initializePlayer(0);
     }
 }
@@ -61,31 +67,89 @@ async function fetchTitleFromOEmbed(videoId) {
     }
 }
 
-// --- 로컬 저장소 연동 ---
-async function loadPlaylist() {
-    const storedList = localStorage.getItem(STORAGE_KEY);
-    if (storedList) {
+// --- 로컬 저장소 연동 (전체 플레이리스트) ---
+async function loadAllPlaylists() {
+    const storedPlaylists = localStorage.getItem(ALL_PLAYLISTS_KEY);
+    const storedActiveTab = localStorage.getItem(ACTIVE_TAB_KEY);
+    
+    if (storedPlaylists) {
         try {
-            playlist = JSON.parse(storedList);
-            for (let video of playlist) {
-                if (!video.title || video.title.startsWith('영상')) {
-                    video.title = await fetchTitleFromOEmbed(video.videoId);
-                }
-            }
-            savePlaylist();
+            allPlaylists = JSON.parse(storedPlaylists);
         } catch (e) {
             console.error("로컬 저장소 파싱 실패:", e);
-            playlist = [];
+            allPlaylists = {};
         }
     }
+    
+    if (Object.keys(allPlaylists).length === 0) {
+        allPlaylists['기본'] = [];
+    }
+    
+    if (storedActiveTab && allPlaylists[storedActiveTab]) {
+        activeTabName = storedActiveTab;
+    } else {
+        activeTabName = Object.keys(allPlaylists)[0];
+    }
+
+    playlist = allPlaylists[activeTabName];
+    
+    // 비디오 제목 업데이트 (비동기)
+    for (let video of playlist) {
+        if (!video.title || video.title.startsWith('제목 없음')) {
+            video.title = await fetchTitleFromOEmbed(video.videoId);
+        }
+    }
+    saveAllPlaylists();
+    
+    renderTabs();
     renderPlaylist();
 }
 
-function savePlaylist() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(playlist));
+function saveAllPlaylists() {
+    allPlaylists[activeTabName] = playlist;
+    localStorage.setItem(ALL_PLAYLISTS_KEY, JSON.stringify(allPlaylists));
+    localStorage.setItem(ACTIVE_TAB_KEY, activeTabName);
 }
 
-// --- DOM 렌더링 ---
+// --- 탭 렌더링 및 이벤트 처리 ---
+function renderTabs() {
+    tabListEl.innerHTML = '';
+    const tabNames = Object.keys(allPlaylists);
+
+    tabNames.forEach(name => {
+        const tabItem = document.createElement('li');
+        tabItem.classList.add('tab-item');
+        tabItem.textContent = name;
+        tabItem.dataset.tabName = name;
+        
+        if (name === activeTabName) {
+            tabItem.classList.add('active');
+        }
+        
+        tabListEl.appendChild(tabItem);
+    });
+}
+
+function switchTab(tabName) {
+    activeTabName = tabName;
+    playlist = allPlaylists[activeTabName] || [];
+    saveAllPlaylists();
+    renderTabs();
+    renderPlaylist();
+    
+    // 플레이어 초기화
+    if (playlist.length > 0) {
+        initializePlayer(0, true);
+    } else {
+        if (player) {
+            player.destroy();
+            player = null;
+        }
+        playerDiv.innerHTML = '';
+    }
+}
+
+// --- DOM 렌더링 (플레이리스트) ---
 function renderPlaylist() {
     videoListEl.innerHTML = '';
     if (playlist.length === 0) {
@@ -124,6 +188,18 @@ function addEventListeners() {
         if (e.key === 'Enter') addVideo();
     });
 
+    addTabBtn.addEventListener('click', addTab);
+    tabNameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') addTab();
+    });
+
+    tabListEl.addEventListener('click', (e) => {
+        const tabItem = e.target.closest('.tab-item');
+        if (tabItem) {
+            switchTab(tabItem.dataset.tabName);
+        }
+    });
+
     videoListEl.addEventListener('click', (e) => {
         const item = e.target.closest('.video-item');
         if (!item) return;
@@ -136,6 +212,33 @@ function addEventListeners() {
             playVideo(index);
         }
     });
+}
+
+// --- 탭 추가 ---
+function addTab() {
+    const tabName = tabNameInput.value.trim();
+    if (!tabName) {
+        alert('플레이리스트 이름을 입력해주세요.');
+        return;
+    }
+    if (allPlaylists[tabName]) {
+        alert('이미 존재하는 이름입니다. 다른 이름을 사용해주세요.');
+        return;
+    }
+    
+    allPlaylists[tabName] = [];
+    activeTabName = tabName;
+    playlist = allPlaylists[activeTabName];
+    saveAllPlaylists();
+    renderTabs();
+    renderPlaylist();
+    
+    if (player) {
+        player.destroy();
+        player = null;
+    }
+    playerDiv.innerHTML = '';
+    tabNameInput.value = '';
 }
 
 // --- 영상 추가 ---
@@ -156,7 +259,7 @@ async function addVideo() {
     const newVideo = { title: videoTitle, videoId: videoId };
 
     playlist.push(newVideo);
-    savePlaylist();
+    saveAllPlaylists();
     renderPlaylist();
 
     if (!player) {
@@ -173,7 +276,7 @@ function deleteVideo(index) {
     if (confirm("정말로 이 영상을 삭제하시겠습니까?")) {
         const isCurrent = index === currentIndex;
         playlist.splice(index, 1);
-        savePlaylist();
+        saveAllPlaylists();
         renderPlaylist();
 
         if (index < currentIndex) currentIndex--;
