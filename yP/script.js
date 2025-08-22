@@ -37,6 +37,7 @@ function initializePlayer(index) {
             rel: 0,
             fs: 1,
             enablejsapi: 1,
+            playsinline: 1 // 모바일 인라인 재생
         },
         events: {
             onReady: onPlayerReady,
@@ -202,10 +203,13 @@ function playVideo(index) {
     }
 }
 
+// --- 플레이어 준비 시 ---
 function onPlayerReady(event) {
+    event.target.mute(); // 음소거 상태로 자동 재생 허용
     event.target.playVideo();
 }
 
+// --- 플레이어 상태 변경 시 ---
 function onPlayerStateChange(event) {
     stopFadeOutCheck();
     if (event.data === YT.PlayerState.ENDED) {
