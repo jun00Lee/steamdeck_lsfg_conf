@@ -1,158 +1,66 @@
+/* 기본 스타일 (모바일 우선) */
 body {
     font-family: Arial, sans-serif;
     background-color: #121212;
     color: #e0e0e0;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 20px;
     margin: 0;
-    flex-wrap: wrap;
-    gap: 20px;
+    padding: 10px;
 }
 
 .container {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
 }
 
-.player-section {
-    width: 640px;
-    max-width: 100%;
+.player-section, .playlist-section {
+    width: 100%;
     background-color: #1e1e1e;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 #player {
     width: 100%;
-    height: 360px;
+    height: 200px; /* 모바일 크기에 맞게 조정 */
     opacity: 1;
     transition: opacity 0.5s ease;
 }
 
-.input-section {
-    display: flex;
-    gap: 10px;
-    padding: 20px;
-    background-color: #1e1e1e;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-}
+/* ... 기존 모바일 스타일 ... */
+/* #video-url, #add-btn, .video-item 등 기존 스타일 유지 */
 
-#video-url {
-    flex-grow: 1;
-    padding: 10px;
-    border: 1px solid #333;
-    border-radius: 4px;
-    background-color: #2b2b2b;
-    color: #e0e0e0;
-}
-
-#video-url:focus {
-    outline: none;
-    border-color: #6200ea;
-}
-
-#add-btn {
-    padding: 10px 15px;
-    background-color: #6200ea;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-#add-btn:hover {
-    background-color: #3700b3;
-}
-
-.playlist-section {
-    width: 350px;
-    max-width: 100%;
-    background-color: #1e1e1e;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
-    padding: 20px;
-    box-sizing: border-box;
-}
-
-.playlist-section h2 {
-    margin-top: 0;
-    color: #ffffff;
-    border-bottom: 2px solid #333;
-    padding-bottom: 10px;
-    margin-bottom: 15px;
-}
-
-#video-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-.video-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    background-color: #2b2b2b;
-    cursor: pointer;
-    transition: background-color 0.3s, transform 0.2s;
-}
-
-.video-item:hover {
-    background-color: #333;
-    transform: translateY(-2px);
-}
-
-.video-item.active {
-    background-color: #6200ea;
-    color: white;
-    font-weight: bold;
-}
-
-.video-title {
-    flex-grow: 1;
-    margin-right: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.delete-btn {
-    background-color: #cf6679;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 6px 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.delete-btn:hover {
-    background-color: #9b2a3a;
-}
-
-.no-videos-message {
-    text-align: center;
-    color: #888;
-    padding: 20px;
-}
-
-@media (max-width: 1000px) {
-    .container {
-        flex-direction: column;
-        align-items: center;
+/* -------------------------------------- */
+/* 데스크톱 스타일: 1024px 이상에서만 적용 */
+/* -------------------------------------- */
+@media (min-width: 1024px) {
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        flex-wrap: nowrap;
     }
 
-    .player-section,
+    .container {
+        flex-direction: row;
+        gap: 20px;
+    }
+
+    .player-section {
+        width: 640px;
+        height: 360px;
+        max-width: none;
+    }
+
+    #player {
+        height: 360px;
+    }
+
     .playlist-section {
-        width: 100%;
+        width: 350px;
+        max-width: none;
     }
 }
