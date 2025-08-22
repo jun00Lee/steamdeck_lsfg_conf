@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로컬 YouTube 플레이어</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="player-container">
+
+        <div class="video-list-panel">
+            <h2>재생 목록 🎶</h2>
+            <ul id="video-list">
+                </ul>
+        </div>
+
+        <div class="add-video-panel">
+            <h2>영상 추가 ➕</h2>
+            <div class="input-group">
+                <input type="text" id="video-url" placeholder="YouTube 영상 URL을 입력하세요">
+                <button id="add-btn">추가</button>
+            </div>
+            <div id="player">
+                </div>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+      // YouTube iFrame Player API 스크립트 로드
+      var tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      var firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+    </script>
+</body>
+</html>

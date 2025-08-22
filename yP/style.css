@@ -1,0 +1,140 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #f0f2f5;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.player-container {
+    display: flex;
+    flex-direction: row; /* 데스크톱 */
+    width: 100%;
+    max-width: 1200px;
+    background-color: #fff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.video-list-panel, .add-video-panel {
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.video-list-panel {
+    flex: 1;
+    border-right: 1px solid #e0e0e0;
+    overflow-y: auto;
+    max-height: 80vh;
+}
+
+.add-video-panel {
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+h2 {
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 5px;
+}
+
+#video-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.video-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.video-item:hover {
+    background-color: #f8f9fa;
+}
+
+.video-item.active {
+    background-color: #e9ecef;
+    font-weight: bold;
+}
+
+.video-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-right: 10px;
+    color: #555;
+}
+
+.delete-btn {
+    padding: 4px 8px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+#video-url {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1em;
+}
+
+#add-btn {
+    padding: 10px 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 6px;
+    font-size: 1em;
+    transition: background-color 0.2s ease;
+}
+
+#add-btn:hover {
+    background-color: #0056b3;
+}
+
+#player {
+    width: 100%;
+    aspect-ratio: 16 / 9; /* 16:9 비율 유지 */
+}
+
+/* 모바일 화면 (가로 폭 768px 이하) */
+@media (max-width: 768px) {
+    .player-container {
+        flex-direction: column;
+    }
+
+    .video-list-panel {
+        border-right: none;
+        border-bottom: 1px solid #e0e0e0;
+        max-height: 40vh;
+    }
+}
