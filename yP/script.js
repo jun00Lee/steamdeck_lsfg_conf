@@ -19,13 +19,12 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- YouTube IFrame API 준비 시 호출 ---
 function onYouTubeIframeAPIReady() {
     if (playlist.length > 0) {
-        // 초기 로딩 시 플레이어만 준비하고, 재생은 사용자 동작으로 시작
-        initializePlayer(0, false);
+        initializePlayer(0);
     }
 }
 
 // --- 플레이어 초기화 ---
-function initializePlayer(index, autoplay = true) {
+function initializePlayer(index) {
     if (player) player.destroy();
     currentIndex = index;
 
@@ -34,11 +33,10 @@ function initializePlayer(index, autoplay = true) {
         width: '640',
         videoId: playlist[currentIndex].videoId,
         playerVars: {
-            autoplay: autoplay ? 1 : 0, // 초기 로딩 시 자동재생 방지
+            autoplay: 1,
             rel: 0,
             fs: 1,
             enablejsapi: 1,
-            playsinline: 1, // iOS 등에서 인라인 재생
         },
         events: {
             onReady: onPlayerReady,
@@ -57,7 +55,7 @@ async function fetchTitleFromOEmbed(videoId) {
         return data.title;
     } catch (error) {
         console.error("제목 가져오기 실패:", error);
-        return `제목 없음 (${videoId.substring(0, 5)}...)`;
+        return `제목 없음 (${videoId})`;
     }
 }
 
@@ -159,9 +157,8 @@ async function addVideo() {
     savePlaylist();
     renderPlaylist();
 
-    // 영상 추가 후, 기존 플레이어가 없거나 정지 상태일 때만 재생
     if (!player) {
-        initializePlayer(playlist.length - 1);
+        initializePlayer(0);
     } else if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
         playVideo(playlist.length - 1);
     }
@@ -200,10 +197,8 @@ function playVideo(index) {
         currentIndex = index;
         player.loadVideoById(playlist[currentIndex].videoId);
         updateActiveItem();
-        updateMediaSession(playlist[currentIndex].title);
     } else if (!player && playlist.length > 0) {
         initializePlayer(index);
-        updateMediaSession(playlist[index].title);
     }
 }
 
@@ -240,33 +235,6 @@ function stopFadeOutCheck() {
         clearInterval(fadeOutTimer);
         fadeOutTimer = null;
         playerDiv.style.opacity = 1;
-    }
-}
-
-// --- Media Session API 함수 ---
-function updateMediaSession(title) {
-    if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: title,
-            artist: 'YouTube Playlist',
-            album: 'My Playlist',
-            artwork: [
-                { src: `https://img.youtube.com/vi/${playlist[currentIndex].videoId}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' }
-            ]
-        });
-
-        navigator.mediaSession.playbackState = 'playing';
-
-        navigator.mediaSession.setActionHandler('play', () => { player.playVideo(); });
-        navigator.mediaSession.setActionHandler('pause', () => { player.pauseVideo(); });
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-            const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-            playVideo(prevIndex);
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            const nextIndex = (currentIndex + 1) % playlist.length;
-            playVideo(nextIndex);
-        });
     }
 }
 
