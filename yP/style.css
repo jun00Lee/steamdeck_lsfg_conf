@@ -137,4 +137,9 @@ h2 {
         border-bottom: 1px solid #e0e0e0;
         max-height: 40vh;
     }
+#player {
+/* 기존 스타일 유지 */
+    opacity: 1;
+    transition: opacity 0.5s ease-out; /* 이 부분을 추가합니다 */
+}
 }
