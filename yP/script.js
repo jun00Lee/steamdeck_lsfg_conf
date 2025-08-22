@@ -60,13 +60,11 @@ async function fetchTitleFromOEmbed(videoId) {
 }
 
 // --- 로컬 저장소 연동 ---
-// 로컬 저장소를 로드하고, 제목이 없는 경우 oEmbed로 가져와 업데이트합니다.
 async function loadPlaylist() {
     const storedList = localStorage.getItem(STORAGE_KEY);
     if (storedList) {
         try {
             playlist = JSON.parse(storedList);
-            // 기존 플레이리스트에서 제목이 비어 있거나 올바르지 않은 경우 업데이트
             for (let video of playlist) {
                 if (!video.title || video.title.startsWith('영상')) {
                     video.title = await fetchTitleFromOEmbed(video.videoId);
@@ -152,7 +150,6 @@ async function addVideo() {
         return;
     }
 
-    // oEmbed를 통해 제목을 가져옵니다.
     const videoTitle = await fetchTitleFromOEmbed(videoId);
     const newVideo = { title: videoTitle, videoId: videoId };
 
@@ -173,7 +170,6 @@ async function addVideo() {
 function deleteVideo(index) {
     if (confirm("정말로 이 영상을 삭제하시겠습니까?")) {
         const isCurrent = index === currentIndex;
-
         playlist.splice(index, 1);
         savePlaylist();
         renderPlaylist();
@@ -194,14 +190,16 @@ function deleteVideo(index) {
     }
 }
 
-// --- 영상 재생 ---
+// --- 영상 재생 (수정된 부분) ---
 function playVideo(index) {
     if (index >= 0 && index < playlist.length && player) {
         currentIndex = index;
         player.loadVideoById(playlist[currentIndex].videoId);
         updateActiveItem();
+        updateMediaSession(playlist[currentIndex].title); // 👈 이 부분을 추가합니다
     } else if (!player && playlist.length > 0) {
         initializePlayer(index);
+        updateMediaSession(playlist[index].title); // 👈 이 부분을 추가합니다
     }
 }
 
@@ -238,6 +236,34 @@ function stopFadeOutCheck() {
         clearInterval(fadeOutTimer);
         fadeOutTimer = null;
         playerDiv.style.opacity = 1;
+    }
+}
+
+// --- Media Session API 함수 (추가된 부분) ---
+function updateMediaSession(title) {
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: title,
+            artist: 'YouTube Playlist',
+            album: 'My Playlist',
+            artwork: [
+                { src: `https://img.youtube.com/vi/${playlist[currentIndex].videoId}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' }
+            ]
+        });
+
+        navigator.mediaSession.playbackState = 'playing';
+
+        // 이전, 다음, 재생/일시정지 버튼 컨트롤러 추가
+        navigator.mediaSession.setActionHandler('play', () => { player.playVideo(); });
+        navigator.mediaSession.setActionHandler('pause', () => { player.pauseVideo(); });
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            playVideo(prevIndex);
+        });
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            const nextIndex = (currentIndex + 1) % playlist.length;
+            playVideo(nextIndex);
+        });
     }
 }
 
