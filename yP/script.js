@@ -6,6 +6,9 @@ const playerDiv = document.getElementById('player');
 const tabListEl = document.getElementById('tab-list');
 const tabNameInput = document.getElementById('tab-name-input');
 const addTabBtn = document.getElementById('add-tab-btn');
+const exportBtn = document.getElementById('export-btn');
+const importBtn = document.getElementById('import-btn');
+const importInput = document.getElementById('import-input');
 
 const ALL_PLAYLISTS_KEY = 'allPlaylists';
 const ACTIVE_TAB_KEY = 'activeTabName';
@@ -93,7 +96,6 @@ async function loadAllPlaylists() {
 
     playlist = allPlaylists[activeTabName];
     
-    // 비디오 제목 업데이트 (비동기)
     for (let video of playlist) {
         if (!video.title || video.title.startsWith('제목 없음')) {
             video.title = await fetchTitleFromOEmbed(video.videoId);
@@ -131,13 +133,14 @@ function renderTabs() {
 }
 
 function switchTab(tabName) {
+    if (activeTabName === tabName) return;
+
     activeTabName = tabName;
     playlist = allPlaylists[activeTabName] || [];
     saveAllPlaylists();
     renderTabs();
     renderPlaylist();
     
-    // 플레이어 초기화
     if (playlist.length > 0) {
         initializePlayer(0, true);
     } else {
@@ -212,6 +215,11 @@ function addEventListeners() {
             playVideo(index);
         }
     });
+
+    // 내보내기/불러오기 버튼 이벤트 리스너
+    exportBtn.addEventListener('click', exportPlaylist);
+    importBtn.addEventListener('click', () => importInput.click());
+    importInput.addEventListener('change', importPlaylist);
 }
 
 // --- 탭 추가 ---
@@ -293,6 +301,66 @@ function deleteVideo(index) {
             playVideo(nextIndex);
         }
     }
+}
+
+// --- 영상 내보내기 (저장) ---
+function exportPlaylist() {
+    if (Object.keys(allPlaylists).length === 0) {
+        alert('내보낼 플레이리스트가 없습니다.');
+        return;
+    }
+    
+    const dataStr = JSON.stringify(allPlaylists, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'playlist.json';
+    document.body.appendChild(a);
+    a.click();
+    
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// --- 영상 불러오기 ---
+function importPlaylist(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (typeof importedData !== 'object' || importedData === null) {
+                throw new Error('올바른 JSON 형식이 아닙니다.');
+            }
+            
+            // 불러온 데이터로 allPlaylists 업데이트
+            allPlaylists = importedData;
+            
+            // 불러온 데이터에 '기본' 탭이 없으면 추가
+            if (!allPlaylists['기본']) {
+                allPlaylists['기본'] = [];
+            }
+            
+            // 활성 탭 설정
+            activeTabName = Object.keys(allPlaylists)[0];
+            playlist = allPlaylists[activeTabName];
+
+            saveAllPlaylists(); // 로컬 스토리지에 저장
+            renderTabs();
+            renderPlaylist();
+
+            alert('플레이리스트를 성공적으로 불러왔습니다!');
+
+        } catch (error) {
+            console.error('파일 불러오기 실패:', error);
+            alert('유효한 playlist.json 파일이 아닙니다.');
+        }
+    };
+    reader.readAsText(file);
 }
 
 // --- 영상 재생 ---

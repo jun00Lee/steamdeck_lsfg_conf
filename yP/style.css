@@ -236,4 +236,26 @@ h1 {
         width: 350px;
         max-width: none;
     }
+/* 파일 입출력 섹션 스타일 */
+.file-io-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+#export-btn, #import-btn {
+    flex-grow: 1;
+    padding: 10px 15px;
+    background-color: #00796b; /* 적절한 색상으로 변경 */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#export-btn:hover, #import-btn:hover {
+    background-color: #004d40;
+}
 }
