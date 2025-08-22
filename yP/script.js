@@ -141,6 +141,7 @@ function renderTabs() {
     });
 }
 
+// 탭 전환 함수 수정
 function switchTab(tabName) {
     if (activeTabName === tabName) return;
 
@@ -150,14 +151,19 @@ function switchTab(tabName) {
     renderTabs();
     renderPlaylist();
     
+    // 탭을 이동할 때 항상 첫 번째 영상(인덱스 0)이 재생되도록 수정
     if (playlist.length > 0) {
         initializePlayer(0, true);
+        currentIndex = 0; // 리스트 활성화를 위해 currentIndex를 0으로 설정
+        updateActiveItem(); // 활성화된 아이템 업데이트
     } else {
         if (player) {
             player.destroy();
             player = null;
         }
         playerDiv.innerHTML = '';
+        currentIndex = -1; // 플레이리스트가 비었을 때 인덱스 초기화
+        updateActiveItem();
     }
 }
 
