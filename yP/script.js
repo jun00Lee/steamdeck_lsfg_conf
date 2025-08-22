@@ -5,31 +5,27 @@ const addBtn = document.getElementById('add-btn');
 const playerDiv = document.getElementById('player');
 const STORAGE_KEY = 'youtubePlaylist';
 
-let player; // YT.Player 인스턴스를 저장할 변수
-let playlist = []; // 재생 목록 배열
-let currentIndex = -1; // 현재 재생 중인 영상의 인덱스
-let fadeOutTimer = null; // 페이드 아웃 타이머를 저장할 변수
+let player;
+let playlist = [];
+let currentIndex = -1;
+let fadeOutTimer = null;
 
-// --- 초기화 함수 ---
+// --- 초기화 ---
 document.addEventListener('DOMContentLoaded', () => {
     loadPlaylist();
     addEventListeners();
 });
 
-// YouTube IFrame Player API가 준비되면 이 함수가 자동으로 호출됩니다.
+// --- YouTube IFrame API 준비 시 호출 ---
 function onYouTubeIframeAPIReady() {
-    console.log("YouTube API is ready.");
     if (playlist.length > 0) {
-        // 플레이어 초기화는 한 번만 수행합니다.
         initializePlayer(0);
     }
 }
 
-// 플레이어를 초기화하고 첫 번째 영상을 로드합니다.
+// --- 플레이어 초기화 ---
 function initializePlayer(index) {
-    if (player) {
-        player.destroy();
-    }
+    if (player) player.destroy();
     currentIndex = index;
 
     player = new YT.Player('player', {
@@ -37,26 +33,46 @@ function initializePlayer(index) {
         width: '640',
         videoId: playlist[currentIndex].videoId,
         playerVars: {
-            'autoplay': 1,
-            'rel': 0, // 관련 동영상 표시 안 함
-            'fs': 1, // 전체 화면 버튼 표시
-            'enablejsapi': 1, // JavaScript API 활성화
+            autoplay: 1,
+            rel: 0,
+            fs: 1,
+            enablejsapi: 1,
         },
         events: {
-            'onReady': onPlayerReady,
-            'onStateChange': onPlayerStateChange
+            onReady: onPlayerReady,
+            onStateChange: onPlayerStateChange
         }
     });
 }
 
+// --- oEmbed로 제목 가져오기 ---
+async function fetchTitleFromOEmbed(videoId) {
+    const url = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("oEmbed 요청 실패");
+        const data = await response.json();
+        return data.title;
+    } catch (error) {
+        console.error("제목 가져오기 실패:", error);
+        return `제목 없음 (${videoId})`;
+    }
+}
+
 // --- 로컬 저장소 연동 ---
-function loadPlaylist() {
+async function loadPlaylist() {
     const storedList = localStorage.getItem(STORAGE_KEY);
     if (storedList) {
         try {
             playlist = JSON.parse(storedList);
+            for (let video of playlist) {
+                if (!video.title || video.title.startsWith('영상')) {
+                    video.title = await fetchTitleFromOEmbed(video.videoId);
+                }
+            }
+            savePlaylist();
         } catch (e) {
-            console.error("Failed to parse playlist from localStorage:", e);
+            console.error("로컬 저장소 파싱 실패:", e);
             playlist = [];
         }
     }
@@ -95,11 +111,7 @@ function renderPlaylist() {
 function updateActiveItem() {
     const videoItems = document.querySelectorAll('.video-item');
     videoItems.forEach((item, i) => {
-        if (i === currentIndex) {
-            item.classList.add('active');
-        } else {
-            item.classList.remove('active');
-        }
+        item.classList.toggle('active', i === currentIndex);
     });
 }
 
@@ -107,16 +119,14 @@ function updateActiveItem() {
 function addEventListeners() {
     addBtn.addEventListener('click', addVideo);
     videoUrlInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            addVideo();
-        }
+        if (e.key === 'Enter') addVideo();
     });
 
     videoListEl.addEventListener('click', (e) => {
         const item = e.target.closest('.video-item');
         if (!item) return;
         const index = parseInt(item.dataset.index);
-        
+
         if (e.target.classList.contains('delete-btn')) {
             e.stopPropagation();
             deleteVideo(index);
@@ -126,8 +136,8 @@ function addEventListeners() {
     });
 }
 
-// --- 영상 추가 / 삭제 ---
-function addVideo() {
+// --- 영상 추가 ---
+async function addVideo() {
     const url = videoUrlInput.value.trim();
     if (!url) {
         alert('URL을 입력해주세요.');
@@ -140,38 +150,32 @@ function addVideo() {
         return;
     }
 
-    const videoTitle = `영상 ${playlist.length + 1}`;
+    const videoTitle = await fetchTitleFromOEmbed(videoId);
     const newVideo = { title: videoTitle, videoId: videoId };
 
     playlist.push(newVideo);
     savePlaylist();
     renderPlaylist();
 
-    // 첫 영상이 추가되면 플레이어 초기화
     if (!player) {
         initializePlayer(0);
-    } else {
-        // 재생 중인 영상이 없으면 바로 재생
-        if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
-            playVideo(playlist.length - 1);
-        }
+    } else if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
+        playVideo(playlist.length - 1);
     }
 
     videoUrlInput.value = '';
 }
 
+// --- 영상 삭제 ---
 function deleteVideo(index) {
     if (confirm("정말로 이 영상을 삭제하시겠습니까?")) {
         const isCurrent = index === currentIndex;
-        
+
         playlist.splice(index, 1);
         savePlaylist();
         renderPlaylist();
 
-        // 삭제로 인해 인덱스가 변경될 수 있으므로 현재 인덱스 업데이트
-        if (index < currentIndex) {
-            currentIndex--;
-        }
+        if (index < currentIndex) currentIndex--;
 
         if (playlist.length === 0) {
             if (player) {
@@ -181,71 +185,60 @@ function deleteVideo(index) {
             currentIndex = -1;
             playerDiv.innerHTML = '';
         } else if (isCurrent) {
-            const nextIndex = (index) % playlist.length;
+            const nextIndex = index % playlist.length;
             playVideo(nextIndex);
         }
     }
 }
 
-// --- 영상 재생 및 제어 ---
+// --- 영상 재생 ---
 function playVideo(index) {
     if (index >= 0 && index < playlist.length && player) {
         currentIndex = index;
-        const videoId = playlist[currentIndex].videoId;
-        player.loadVideoById(videoId);
+        player.loadVideoById(playlist[currentIndex].videoId);
         updateActiveItem();
     } else if (!player && playlist.length > 0) {
-        // 플레이어가 아직 초기화되지 않았으면 초기화 함수 호출
         initializePlayer(index);
     }
 }
 
-// 플레이어가 준비되면 호출됩니다.
 function onPlayerReady(event) {
     event.target.playVideo();
 }
 
-// 플레이어 상태가 변경될 때 호출됩니다.
 function onPlayerStateChange(event) {
-    stopFadeOutCheck(); // 상태 변경 시 타이머를 일단 멈춥니다.
-    // YT.PlayerState.ENDED (0) = 영상이 끝났을 때
+    stopFadeOutCheck();
     if (event.data === YT.PlayerState.ENDED) {
         const nextIndex = (currentIndex + 1) % playlist.length;
         playVideo(nextIndex);
-    }
-    // YT.PlayerState.PLAYING (1) = 영상이 재생 중일 때
-    else if (event.data === YT.PlayerState.PLAYING) {
+    } else if (event.data === YT.PlayerState.PLAYING) {
         startFadeOutCheck();
     }
 }
 
-// 영상 종료 5초 전 페이드 아웃 체크를 시작합니다.
+// --- 페이드 아웃 ---
 function startFadeOutCheck() {
-    if (fadeOutTimer) {
-        clearInterval(fadeOutTimer);
-    }
+    if (fadeOutTimer) clearInterval(fadeOutTimer);
     fadeOutTimer = setInterval(() => {
         const duration = player.getDuration();
         const currentTime = player.getCurrentTime();
         if (duration > 0 && duration - currentTime <= 5 && duration - currentTime >= 0) {
-            const opacity = (duration - currentTime) / 5;
-            playerDiv.style.opacity = opacity;
+            playerDiv.style.opacity = (duration - currentTime) / 5;
         } else {
             playerDiv.style.opacity = 1;
         }
-    }, 100); // 0.1초마다 체크
+    }, 100);
 }
 
-// 페이드 아웃 체크를 중지합니다.
 function stopFadeOutCheck() {
     if (fadeOutTimer) {
         clearInterval(fadeOutTimer);
         fadeOutTimer = null;
-        playerDiv.style.opacity = 1; // opacity를 1로 되돌림
+        playerDiv.style.opacity = 1;
     }
 }
 
-// YouTube URL에서 videoId를 추출하는 함수
+// --- videoId 추출 ---
 function extractVideoId(url) {
     const regex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regex);
