@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
 // --- YouTube IFrame API 준비 시 호출 ---
 function onYouTubeIframeAPIReady() {
     if (playlist.length > 0) {
-        // 초기 로딩 시 플레이어만 준비하고, 재생은 사용자 동작으로 시작
         initializePlayer(0, false);
     }
 }
@@ -34,11 +33,13 @@ function initializePlayer(index, autoplay = true) {
         width: '640',
         videoId: playlist[currentIndex].videoId,
         playerVars: {
-            autoplay: autoplay ? 1 : 0, // 초기 로딩 시 자동재생 방지
+            autoplay: autoplay ? 1 : 0,
             rel: 0,
             fs: 1,
             enablejsapi: 1,
-            playsinline: 1, // iOS 등에서 인라인 재생
+            playsinline: 1,
+            // ⚠️ mute 옵션 제거 또는 false로 설정
+            // mute: 0 // 이 부분이 있었다면 제거하거나 0으로 설정하세요.
         },
         events: {
             onReady: onPlayerReady,
@@ -159,7 +160,6 @@ async function addVideo() {
     savePlaylist();
     renderPlaylist();
 
-    // 영상 추가 후, 기존 플레이어가 없거나 정지 상태일 때만 재생
     if (!player) {
         initializePlayer(playlist.length - 1);
     } else if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
@@ -208,7 +208,10 @@ function playVideo(index) {
 }
 
 function onPlayerReady(event) {
+    // 자동재생 허용을 위해 playVideo 호출
     event.target.playVideo();
+    // 볼륨을 100으로 설정 (필요한 경우)
+    event.target.setVolume(100);
 }
 
 function onPlayerStateChange(event) {
