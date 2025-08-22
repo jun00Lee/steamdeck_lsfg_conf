@@ -16,10 +16,11 @@ document.addEventListener('DOMContentLoaded', () => {
     addEventListeners();
 });
 
-// 유튜브 IFrame Player API가 준비되면 이 함수가 자동으로 호출됩니다.
+// YouTube IFrame Player API가 준비되면 이 함수가 자동으로 호출됩니다.
 function onYouTubeIframeAPIReady() {
     console.log("YouTube API is ready.");
     if (playlist.length > 0) {
+        // 플레이어 초기화는 한 번만 수행합니다.
         initializePlayer(0);
     }
 }
@@ -30,16 +31,16 @@ function initializePlayer(index) {
         player.destroy();
     }
     currentIndex = index;
-    const firstVideoId = playlist[currentIndex].videoId;
 
     player = new YT.Player('player', {
         height: '360',
         width: '640',
-        videoId: firstVideoId,
+        videoId: playlist[currentIndex].videoId,
         playerVars: {
             'autoplay': 1,
             'rel': 0, // 관련 동영상 표시 안 함
             'fs': 1, // 전체 화면 버튼 표시
+            'enablejsapi': 1, // JavaScript API 활성화
         },
         events: {
             'onReady': onPlayerReady,
@@ -117,7 +118,7 @@ function addEventListeners() {
         const index = parseInt(item.dataset.index);
         
         if (e.target.classList.contains('delete-btn')) {
-            e.stopPropagation(); // 플레이 이벤트가 버블링되지 않도록
+            e.stopPropagation();
             deleteVideo(index);
         } else {
             playVideo(index);
@@ -150,7 +151,7 @@ function addVideo() {
     if (!player) {
         initializePlayer(0);
     } else {
-        // 영상 추가 후 현재 재생 중인 영상이 없다면 바로 재생
+        // 재생 중인 영상이 없으면 바로 재생
         if (player.getPlayerState() !== YT.PlayerState.PLAYING) {
             playVideo(playlist.length - 1);
         }
@@ -161,30 +162,27 @@ function addVideo() {
 
 function deleteVideo(index) {
     if (confirm("정말로 이 영상을 삭제하시겠습니까?")) {
-        // 현재 재생 중인 영상을 삭제하는 경우
-        if (index === currentIndex) {
-            const nextIndex = (index + 1) % playlist.length;
-            playlist.splice(index, 1);
-            savePlaylist();
-            renderPlaylist();
-            if (playlist.length > 0) {
-                // 다음 영상이 있다면 재생, 없다면 0번 영상 재생
-                playVideo(nextIndex < playlist.length ? nextIndex : 0);
-            } else {
+        const isCurrent = index === currentIndex;
+        
+        playlist.splice(index, 1);
+        savePlaylist();
+        renderPlaylist();
+
+        // 삭제로 인해 인덱스가 변경될 수 있으므로 현재 인덱스 업데이트
+        if (index < currentIndex) {
+            currentIndex--;
+        }
+
+        if (playlist.length === 0) {
+            if (player) {
                 player.destroy();
                 player = null;
-                currentIndex = -1;
-                playerDiv.innerHTML = '';
             }
-        } else {
-            // 다른 영상을 삭제하는 경우
-            playlist.splice(index, 1);
-            savePlaylist();
-            renderPlaylist();
-            // 삭제로 인해 인덱스가 변경될 수 있으므로 현재 인덱스 업데이트
-            if (index < currentIndex) {
-                currentIndex--;
-            }
+            currentIndex = -1;
+            playerDiv.innerHTML = '';
+        } else if (isCurrent) {
+            const nextIndex = (index) % playlist.length;
+            playVideo(nextIndex);
         }
     }
 }
@@ -197,6 +195,7 @@ function playVideo(index) {
         player.loadVideoById(videoId);
         updateActiveItem();
     } else if (!player && playlist.length > 0) {
+        // 플레이어가 아직 초기화되지 않았으면 초기화 함수 호출
         initializePlayer(index);
     }
 }
@@ -204,24 +203,19 @@ function playVideo(index) {
 // 플레이어가 준비되면 호출됩니다.
 function onPlayerReady(event) {
     event.target.playVideo();
-    startFadeOutCheck();
 }
 
 // 플레이어 상태가 변경될 때 호출됩니다.
 function onPlayerStateChange(event) {
+    stopFadeOutCheck(); // 상태 변경 시 타이머를 일단 멈춥니다.
     // YT.PlayerState.ENDED (0) = 영상이 끝났을 때
     if (event.data === YT.PlayerState.ENDED) {
-        stopFadeOutCheck();
         const nextIndex = (currentIndex + 1) % playlist.length;
         playVideo(nextIndex);
-    } 
+    }
     // YT.PlayerState.PLAYING (1) = 영상이 재생 중일 때
     else if (event.data === YT.PlayerState.PLAYING) {
         startFadeOutCheck();
-    }
-    // 다른 상태일 때 페이드 아웃 타이머 정지
-    else {
-        stopFadeOutCheck();
     }
 }
 
@@ -231,9 +225,11 @@ function startFadeOutCheck() {
         clearInterval(fadeOutTimer);
     }
     fadeOutTimer = setInterval(() => {
-        const remainingTime = player.getDuration() - player.getCurrentTime();
-        if (remainingTime <= 5 && remainingTime > 0) {
-            playerDiv.style.opacity = remainingTime / 5;
+        const duration = player.getDuration();
+        const currentTime = player.getCurrentTime();
+        if (duration > 0 && duration - currentTime <= 5 && duration - currentTime >= 0) {
+            const opacity = (duration - currentTime) / 5;
+            playerDiv.style.opacity = opacity;
         } else {
             playerDiv.style.opacity = 1;
         }
