@@ -282,6 +282,37 @@ function addEventListeners() {
     exportBtn.addEventListener('click', exportPlaylist);
     importBtn.addEventListener('click', () => importInput.click());
     importInput.addEventListener('change', importPlaylist);
+
+    // 미디어 세션 핸들러를 페이지 로드 시점에 설정
+    if ('mediaSession' in navigator) {
+        navigator.mediaSession.setActionHandler('play', () => { 
+            if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                player.playVideo();
+            } else if (playlist.length > 0 && currentIndex === -1) {
+                playVideo(0); // 재생 중이 아니며 플레이어가 없는 경우, 첫 번째 비디오 재생
+            }
+        });
+        
+        navigator.mediaSession.setActionHandler('pause', () => { 
+            if (player) {
+                player.pauseVideo(); 
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('previoustrack', () => {
+            if (playlist.length > 0) {
+                const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+                playVideo(prevIndex);
+            }
+        });
+
+        navigator.mediaSession.setActionHandler('nexttrack', () => {
+            if (playlist.length > 0) {
+                const nextIndex = (currentIndex + 1) % playlist.length;
+                playVideo(nextIndex);
+            }
+        });
+    }
 }
 
 // --- 탭 추가 (모달에서 호출) ---
@@ -487,24 +518,13 @@ function updateMediaSession(title) {
         navigator.mediaSession.metadata = new MediaMetadata({
             title: title,
             artist: 'YouTube Playlist',
-            album: 'My Playlist',
+            album: activeTabName,
             artwork: [
                 { src: `https://img.youtube.com/vi/${playlist[currentIndex].videoId}/mqdefault.jpg`, sizes: '320x180', type: 'image/jpeg' }
             ]
         });
 
         navigator.mediaSession.playbackState = 'playing';
-
-        navigator.mediaSession.setActionHandler('play', () => { player.playVideo(); });
-        navigator.mediaSession.setActionHandler('pause', () => { player.pauseVideo(); });
-        navigator.mediaSession.setActionHandler('previoustrack', () => {
-            const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-            playVideo(prevIndex);
-        });
-        navigator.mediaSession.setActionHandler('nexttrack', () => {
-            const nextIndex = (currentIndex + 1) % playlist.length;
-            playVideo(nextIndex);
-        });
     }
 }
 
