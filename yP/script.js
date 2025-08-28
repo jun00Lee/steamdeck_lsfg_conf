@@ -496,12 +496,12 @@ function onPlayerStateChange(event) {
 
 // --- 랜덤 재생 기능 ---
 function shufflePlaylist() {
-    // 피셔-예이츠 셔플(Fisher-Yates Shuffle) 알고리즘을 사용해 배열을 무작위로 섞습니다.
     if (playlist.length <= 1) {
         alert('셔플할 영상이 2개 이상 필요합니다.');
         return;
     }
     
+    // 피셔-예이츠 셔플(Fisher-Yates Shuffle) 알고리즘을 사용해 배열을 무작위로 섞습니다.
     for (let i = playlist.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
@@ -510,20 +510,9 @@ function shufflePlaylist() {
     saveAllPlaylists(); // 섞인 플레이리스트를 저장
     renderPlaylist();   // 목록을 다시 렌더링
     
-    // 현재 재생 중인 영상이 없다면 첫 번째 영상을 재생합니다.
-    if (currentIndex === -1) {
-        playVideo(0);
-    } else {
-        // 기존에 재생 중이던 영상의 새로운 인덱스를 찾아서 재생합니다.
-        const currentVideoId = player.getVideoUrl().split('v=')[1];
-        const newIndex = playlist.findIndex(video => video.videoId === currentVideoId);
-        if (newIndex !== -1) {
-            currentIndex = newIndex;
-            updateActiveItem();
-        } else {
-            playVideo(0); // 찾지 못하면 첫 번째 영상 재생
-        }
-    }
+    // 섞인 플레이리스트에서 랜덤으로 영상을 선택하여 재생
+    const newIndex = Math.floor(Math.random() * playlist.length);
+    playVideo(newIndex);
 }
 
 // --- 페이드 아웃 ---
