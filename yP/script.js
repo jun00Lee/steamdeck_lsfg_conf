@@ -8,6 +8,7 @@ const addTabPlusBtn = document.getElementById('add-tab-btn');
 const exportBtn = document.getElementById('export-btn');
 const importBtn = document.getElementById('import-btn');
 const importInput = document.getElementById('import-input');
+const shuffleBtn = document.getElementById('shuffle-btn'); // 셔플 버튼 변수 추가
 
 // 모달 관련 변수
 const modalOverlay = document.getElementById('modal-overlay');
@@ -229,6 +230,9 @@ function addEventListeners() {
     // "+" 버튼 클릭 이벤트
     addTabPlusBtn.addEventListener('click', showAddTabModal);
     
+    // 랜덤 재생 버튼 클릭 이벤트 추가
+    shuffleBtn.addEventListener('click', shufflePlaylist);
+
     // 모달 버튼 클릭 이벤트
     modalOkBtn.addEventListener('click', () => {
         const tabName = modalTabNameInput.value.trim();
@@ -487,6 +491,38 @@ function onPlayerStateChange(event) {
         playVideo(nextIndex);
     } else if (event.data === YT.PlayerState.PLAYING) {
         startFadeOutCheck();
+    }
+}
+
+// --- 랜덤 재생 기능 ---
+function shufflePlaylist() {
+    // 피셔-예이츠 셔플(Fisher-Yates Shuffle) 알고리즘을 사용해 배열을 무작위로 섞습니다.
+    if (playlist.length <= 1) {
+        alert('셔플할 영상이 2개 이상 필요합니다.');
+        return;
+    }
+    
+    for (let i = playlist.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [playlist[i], playlist[j]] = [playlist[j], playlist[i]];
+    }
+
+    saveAllPlaylists(); // 섞인 플레이리스트를 저장
+    renderPlaylist();   // 목록을 다시 렌더링
+    
+    // 현재 재생 중인 영상이 없다면 첫 번째 영상을 재생합니다.
+    if (currentIndex === -1) {
+        playVideo(0);
+    } else {
+        // 기존에 재생 중이던 영상의 새로운 인덱스를 찾아서 재생합니다.
+        const currentVideoId = player.getVideoUrl().split('v=')[1];
+        const newIndex = playlist.findIndex(video => video.videoId === currentVideoId);
+        if (newIndex !== -1) {
+            currentIndex = newIndex;
+            updateActiveItem();
+        } else {
+            playVideo(0); // 찾지 못하면 첫 번째 영상 재생
+        }
     }
 }
 
