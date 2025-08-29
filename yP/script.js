@@ -8,7 +8,7 @@ const addTabPlusBtn = document.getElementById('add-tab-btn');
 const exportBtn = document.getElementById('export-btn');
 const importBtn = document.getElementById('import-btn');
 const importInput = document.getElementById('import-input');
-const shuffleBtn = document.getElementById('shuffle-btn'); // 셔플 버튼 변수 추가
+const shuffleBtn = document.getElementById('shuffle-btn');
 
 // 모달 관련 변수
 const modalOverlay = document.getElementById('modal-overlay');
@@ -293,7 +293,7 @@ function addEventListeners() {
             if (player && player.getPlayerState() !== YT.PlayerState.PLAYING) {
                 player.playVideo();
             } else if (playlist.length > 0 && currentIndex === -1) {
-                playVideo(0); // 재생 중이 아니며 플레이어가 없는 경우, 첫 번째 비디오 재생
+                playVideo(0);
             }
         });
         
@@ -303,13 +303,20 @@ function addEventListeners() {
             }
         });
 
+        // '이전 트랙' 버튼 기능 수정
         navigator.mediaSession.setActionHandler('previoustrack', () => {
             if (playlist.length > 0) {
-                const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
-                playVideo(prevIndex);
+                // 현재 재생 중인 영상이 5초 이내라면 이전 영상으로 이동, 그렇지 않으면 처음부터 다시 재생
+                if (player.getCurrentTime() <= 5) {
+                    const prevIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+                    playVideo(prevIndex);
+                } else {
+                    player.seekTo(0);
+                }
             }
         });
 
+        // '다음 트랙' 버튼 기능 수정
         navigator.mediaSession.setActionHandler('nexttrack', () => {
             if (playlist.length > 0) {
                 const nextIndex = (currentIndex + 1) % playlist.length;
