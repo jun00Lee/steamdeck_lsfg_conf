@@ -1,0 +1,33 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Private Chat - 1:1 Mobile</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background-color: #0f1115;
+      overscroll-behavior-y: contain; /* 당겨서 새로고침 방지 */
+      -webkit-tap-highlight-color: transparent;
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "express": "https://esm.sh/express@^5.2.1"
+  }
+}
+</script>
+</head>
+<body class="overflow-hidden">
+  <div id="root"></div>
+  <script type="module" src="index.tsx"></script>
+</body>
+</html>
